@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Duyệt Yêu Cầu Nghỉ Phép</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      padding: 30px;
+      text-align: center;
+      position: relative;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="0%"><stop offset="0%" stop-color="rgba(255,255,255,0.1)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient></defs><ellipse cx="50" cy="0" rx="50" ry="20" fill="url(%23a)"/></svg>') no-repeat center top;
+      background-size: 100% 100%;
+    }
+
+    h2 {
+      font-size: 2.5em;
+      font-weight: 300;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .subtitle {
+      font-size: 1.1em;
+      opacity: 0.9;
+      position: relative;
+      z-index: 1;
+    }
+
+    .table-container {
+      padding: 40px;
+      background: white;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 18px 20px;
+      text-align: left;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    th {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-align: center;
+    }
+
+    td {
+      font-size: 14px;
+      text-align: center;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: #f8fafc;
+    }
+
+    tbody tr:hover {
+      background-color: #f1f5f9;
+      transform: scale(1.005);
+      transition: all 0.2s ease;
+    }
+
+    .employee-name {
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .leave-type {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .leave-type.annual { background: #dbeafe; color: #1e40af; }
+    .leave-type.sick { background: #fee2e2; color: #dc2626; }
+    .leave-type.personal { background: #f3e8ff; color: #7c3aed; }
+    .leave-type.maternity { background: #ecfdf5; color: #059669; }
+    .leave-type.emergency { background: #fef3c7; color: #d97706; }
+
+    .date-range {
+      font-weight: 500;
+      color: #6b7280;
+    }
+
+    .days-count {
+      background: #e5e7eb;
+      color: #374151;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
+    .reason-text {
+      max-width: 200px;
+      text-align: left;
+      line-height: 1.4;
+      color: #6b7280;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .approve {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+
+    .approve:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+    }
+
+    .reject {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+
+    .reject:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #6b7280;
+    }
+
+    .empty-state-icon {
+      font-size: 4em;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+
+    .loading-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #6b7280;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f4f6;
+      border-radius: 50%;
+      border-top-color: #4f46e5;
+      animation: spin 1s ease-in-out infinite;
+      margin-bottom: 20px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        margin: 10px;
+        border-radius: 16px;
+      }
+      
+      .header {
+        padding: 20px;
+      }
+      
+      h2 {
+        font-size: 2em;
+      }
+      
+      .table-container {
+        padding: 20px;
+      }
+      
+      th, td {
+        padding: 12px 8px;
+        font-size: 12px;
+      }
+      
+      .reason-text {
+        max-width: 120px;
+        font-size: 11px;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+        gap: 4px;
+      }
+      
+      button {
+        padding: 6px 12px;
+        font-size: 11px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h2> Duyệt Yêu Cầu Nghỉ Phép</h2>
+      <p class="subtitle">Quản lý và duyệt các yêu cầu nghỉ phép từ nhân viên</p>
+    </div>
+
+    <div class="table-container">
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th> Nhân viên</th>
+              <th> Loại nghỉ</th>
+              <th> Thời gian</th>
+              <th> Lý do</th>
+              <th> Hành động</th>
+            </tr>
+          </thead>
+          <tbody id="leaveTable">
+            <tr>
+              <td colspan="5" class="loading-state">
+                <div class="loading-spinner"></div>
+                <div>Đang tải dữ liệu...</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("Vui lòng đăng nhập.");
+      window.location.href = "index.html";
+    }
+
+    // Lấy danh sách yêu cầu nghỉ phép cần duyệt
+    async function fetchLeaveRequests() {
+      try {
+        const res = await fetch("http://localhost:3001/api/leave_request/pending", {
+          headers: {
+            Authorization: "Bearer " + token
+          }
+        });
+
+        if (res.status === 403) {
+          alert("Chỉ quản lý mới có quyền truy cập!");
+          return;
+        }
+
+        const data = await res.json();
+        renderLeaveRequests(data);
+      } catch (error) {
+        console.error("Lỗi khi tải dữ liệu:", error);
+        document.getElementById("leaveTable").innerHTML = `
+          <tr>
+            <td colspan="5" class="empty-state">
+              <div class="empty-state-icon">❌</div>
+              <div>Lỗi khi tải dữ liệu</div>
+            </td>
+          </tr>
+        `;
+      }
+    }
+
+    // Hiển thị danh sách
+    function renderLeaveRequests(data) {
+      const tbody = document.getElementById("leaveTable");
+      if (!data.length) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="empty-state">
+              <div class="empty-state-icon">📝</div>
+              <div>Không có yêu cầu chờ duyệt</div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = data.map(req => `
+        <tr>
+          <td class="employee-name">${req.employee?.name || req.userId}</td>
+          <td>
+            <span class="leave-type ${req.leaveType}">${translateType(req.leaveType)}</span>
+          </td>
+          <td>
+            <div class="date-range">
+              ${formatDate(req.startDate)} → ${formatDate(req.endDate)}
+              <span class="days-count">${req.days} ngày</span>
+            </div>
+          </td>
+          <td class="reason-text">${req.reason}</td>
+          <td>
+            <div class="action-buttons">
+              <button class="approve" onclick="handleDecision(${req.id}, 'approve')">✅ Duyệt</button>
+              <button class="reject" onclick="handleDecision(${req.id}, 'reject')">❌ Từ chối</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    // Duyệt hoặc từ chối
+    async function handleDecision(id, action) {
+      let reason = "";
+
+      if (action === "reject") {
+        reason = prompt("Nhập lý do từ chối:");
+        if (!reason) return;
+      }
+
+      const res = await fetch(`http://localhost:3001/api/leave_request/${id}/${action}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token
+        },
+        body: JSON.stringify({ reason })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert("Thao tác thành công");
+        fetchLeaveRequests(); // reload
+      } else {
+        alert("" + (data.message || "Lỗi thao tác"));
+      }
+    }
+
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString("vi-VN");
+    }
+
+    function translateType(type) {
+      return {
+        annual: "Nghỉ phép năm",
+        sick: "Nghỉ ốm",
+        personal: "Nghỉ cá nhân",
+        maternity: "Nghỉ thai sản",
+        emergency: "Khẩn cấp"
+      }[type] || type;
+    }
+
+    fetchLeaveRequests();
+  </script>
+</body>
+</html>

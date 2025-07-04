@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gửi yêu cầu nghỉ phép</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      padding: 30px;
+      text-align: center;
+      position: relative;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="0%"><stop offset="0%" stop-color="rgba(255,255,255,0.1)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient></defs><ellipse cx="50" cy="0" rx="50" ry="20" fill="url(%23a)"/></svg>') no-repeat center top;
+      background-size: 100% 100%;
+    }
+
+    h2 {
+      font-size: 2.5em;
+      font-weight: 300;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .subtitle {
+      font-size: 1.1em;
+      opacity: 0.9;
+      position: relative;
+      z-index: 1;
+    }
+
+    form {
+      padding: 40px;
+      background: white;
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #374151;
+      font-size: 14px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      background: white;
+      font-family: inherit;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      transform: translateY(-2px);
+    }
+
+    select {
+      cursor: pointer;
+      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,9 12,15 18,9"></polyline></svg>');
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px;
+      padding-right: 40px;
+      appearance: none;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .date-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    button {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      border: none;
+      padding: 16px 32px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .success {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      padding: 16px 20px;
+      border-radius: 12px;
+      text-align: center;
+      margin-top: 20px;
+      font-weight: 500;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+
+    .error {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+      padding: 16px 20px;
+      border-radius: 12px;
+      text-align: center;
+      margin-top: 20px;
+      font-weight: 500;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+
+    .form-icon {
+      display: inline-block;
+      margin-right: 8px;
+      font-size: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        margin: 10px;
+        border-radius: 16px;
+      }
+      
+      .header {
+        padding: 20px;
+      }
+      
+      h2 {
+        font-size: 2em;
+      }
+      
+      form {
+        padding: 20px;
+      }
+      
+      .date-group {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+      
+      button {
+        padding: 14px 24px;
+      }
+    }
+
+    /* Animation cho form khi load */
+    .form-group {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: slideUp 0.6s ease forwards;
+    }
+
+    .form-group:nth-child(1) { animation-delay: 0.1s; }
+    .form-group:nth-child(2) { animation-delay: 0.2s; }
+    .form-group:nth-child(3) { animation-delay: 0.3s; }
+    .form-group:nth-child(4) { animation-delay: 0.4s; }
+    .form-group:nth-child(5) { animation-delay: 0.5s; }
+
+    @keyframes slideUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h2> Gửi Yêu Cầu Nghỉ Phép</h2>
+      <p class="subtitle">Điền thông tin yêu cầu nghỉ phép của bạn</p>
+    </div>
+
+    <form id="leaveForm">
+      <div class="form-group">
+        <label for="leaveType">
+          <span class="form-icon"></span>Loại nghỉ phép:
+        </label>
+        <select id="leaveType" required>
+          <option value="annual">Nghỉ phép năm</option>
+          <option value="sick">Nghỉ ốm</option>
+          <option value="personal">Nghỉ cá nhân</option>
+          <option value="maternity">Nghỉ thai sản</option>
+          <option value="emergency">Nghỉ khẩn cấp</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <div class="date-group">
+          <div>
+            <label for="startDate">
+              <span class="form-icon"></span>Từ ngày:
+            </label>
+            <input type="date" id="startDate" required>
+          </div>
+          <div>
+            <label for="endDate">
+              <span class="form-icon"></span>Đến ngày:
+            </label>
+            <input type="date" id="endDate" required>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="reason">
+          <span class="form-icon"></span>Lý do nghỉ:
+        </label>
+        <textarea id="reason" rows="4" placeholder="Nhập lý do nghỉ phép của bạn..." required></textarea>
+      </div>
+
+      <div class="form-group">
+        <button type="submit">
+          <span class="form-icon"></span>Gửi yêu cầu
+        </button>
+      </div>
+
+      <div id="message"></div>
+    </form>
+  </div>
+
+  <script>
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Bạn chưa đăng nhập!");
+      window.location.href = "index.html";
+    }
+
+    const form = document.getElementById("leaveForm");
+    const message = document.getElementById("message");
+
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      message.textContent = "";
+
+      const data = {
+        leaveType: document.getElementById("leaveType").value,
+        startDate: document.getElementById("startDate").value,
+        endDate: document.getElementById("endDate").value,
+        reason: document.getElementById("reason").value
+      };
+
+      // Validate ngày
+      if (data.startDate > data.endDate) {
+        message.innerHTML = `<p class="error">Ngày kết thúc phải sau ngày bắt đầu.</p>`;
+        return;
+      }
+
+      try {
+        const res = await fetch("http://localhost:3001/api/leave_request", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
+          },
+          body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+
+        if (!res.ok) {
+          message.innerHTML = `<p class="error">${result.message || "Lỗi gửi yêu cầu."}</p>`;
+        } else {
+          message.innerHTML = `<p class="success">Gửi yêu cầu thành công! Chờ duyệt.</p>`;
+          form.reset();
+        }
+
+      } catch (err) {
+        console.error("Lỗi gửi yêu cầu:", err);
+        message.innerHTML = `<p class="error">Lỗi mạng. Vui lòng thử lại.</p>`;
+      }
+    });
+  </script>
+
+</body>
+</html>

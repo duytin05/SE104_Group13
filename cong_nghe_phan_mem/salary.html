@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tra cứu lương</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      padding: 30px;
+      text-align: center;
+      position: relative;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="0%"><stop offset="0%" stop-color="rgba(255,255,255,0.1)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient></defs><ellipse cx="50" cy="0" rx="50" ry="20" fill="url(%23a)"/></svg>') no-repeat center top;
+      background-size: 100% 100%;
+    }
+
+    h2 { 
+      font-size: 2.5em;
+      font-weight: 300;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .subtitle {
+      font-size: 1.1em;
+      opacity: 0.9;
+      position: relative;
+      z-index: 1;
+    }
+
+    .search-section {
+      padding: 40px;
+      text-align: center;
+      background: #fafafa;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .input-group {
+      display: inline-flex;
+      gap: 15px;
+      align-items: flex-end;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .input-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    label {
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #374151;
+      font-size: 14px;
+    }
+
+    input {
+      padding: 12px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-size: 16px;
+      width: 120px;
+      transition: all 0.3s ease;
+      background: white;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      transform: translateY(-2px);
+    }
+
+    button {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+      height: 46px;
+      margin-top: auto;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .results-section {
+      padding: 40px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    th, td {
+      padding: 18px 24px;
+      text-align: left;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    th {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f8fafc;
+    }
+
+    tr:hover {
+      background-color: #f1f5f9;
+      transform: scale(1.01);
+      transition: all 0.2s ease;
+    }
+
+    .final-salary-row {
+      background: linear-gradient(135deg, #10b981, #059669) !important;
+      color: white;
+    }
+
+    .final-salary-row:hover {
+      background: linear-gradient(135deg, #059669, #047857) !important;
+    }
+
+    .final-salary-row td {
+      font-weight: bold;
+      font-size: 1.1em;
+    }
+
+    .error {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      margin: 20px 0;
+      font-weight: 500;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+
+    .currency {
+      font-weight: 600;
+      color: #059669;
+    }
+
+    .negative {
+      color: #dc2626;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        margin: 10px;
+        border-radius: 16px;
+      }
+      
+      .header {
+        padding: 20px;
+      }
+      
+      h2 {
+        font-size: 2em;
+      }
+      
+      .search-section, .results-section {
+        padding: 20px;
+      }
+      
+      .input-group {
+        flex-direction: column;
+        gap: 20px;
+      }
+      
+      .input-wrapper {
+        width: 100%;
+        align-items: center;
+      }
+      
+      input {
+        width: 200px;
+      }
+      
+      table {
+        font-size: 14px;
+      }
+      
+      th, td {
+        padding: 12px 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h2> Tra cứu lương cá nhân</h2>
+      <p class="subtitle">Xem thông tin lương và thưởng của bạn</p>
+    </div>
+
+    <div class="search-section">
+      <div class="input-group">
+        <div class="input-wrapper">
+          <label>📅 Tháng:</label>
+          <input type="number" id="month" min="1" max="12" placeholder="VD: 6" />
+        </div>
+
+        <div class="input-wrapper">
+          <label>🗓️ Năm:</label>
+          <input type="number" id="year" min="2000" max="2099" value="2025" />
+        </div>
+      </div>
+
+      <button onclick="fetchSalary()">🔍 Tra cứu lương</button>
+    </div>
+
+    <div class="results-section">
+      <div id="salaryResult" style="display:none;">
+        <table>
+          <thead>
+            <tr>
+              <th>Thông tin</th>
+              <th>Chi tiết</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td> Tháng/Năm</td><td id="monthYear"></td></tr>
+            <tr><td> Số ngày làm</td><td id="workDays"></td></tr>
+            <tr><td> Số ngày đi trễ</td><td id="lateDays"></td></tr>
+            <tr><td> Tổng giờ làm</td><td id="totalHours"></td></tr>
+            <tr><td> Tổng giờ tăng ca</td><td id="totalOT"></td></tr>
+            <tr><td> Lương cơ bản</td><td id="basicSalary" class="currency"></td></tr>
+            <tr><td> Lương tăng ca</td><td id="otSalary" class="currency"></td></tr>
+            <tr><td> Phạt đi trễ</td><td id="lateDeduction" class="negative"></td></tr>
+            <tr class="final-salary-row">
+              <td> <strong>Lương nhận được</strong></td>
+              <td id="finalSalary"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="errorMsg" class="error" style="display:none;"></div>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Bạn chưa đăng nhập!");
+      window.location.href = "index.html";
+    }
+
+    function fetchSalary() {
+      const month = parseInt(document.getElementById("month").value);
+      const year = parseInt(document.getElementById("year").value);
+
+      if (!month || month < 1 || month > 12 || !year) {
+        const errorDiv = document.getElementById("errorMsg");
+        errorDiv.innerText = "Vui lòng nhập tháng từ 1-12 và năm hợp lệ.";
+        errorDiv.style.display = "block";
+        document.getElementById("salaryResult").style.display = "none";
+        return;
+      }
+
+      const paddedMonth = month.toString().padStart(2, "0");
+
+      fetch(`http://localhost:3001/api/salary?month=${paddedMonth}&year=${year}`, {
+        headers: {
+          Authorization: "Bearer " + token
+        }
+      })
+      .then(res => {
+        if (res.status === 404) {
+          document.getElementById("salaryResult").style.display = "none";
+          const errorDiv = document.getElementById("errorMsg");
+          errorDiv.innerText = "Không có dữ liệu lương cho tháng này.";
+          errorDiv.style.display = "block";
+          return null;
+        }
+        if (!res.ok) throw new Error("Lỗi khi truy vấn API lương");
+        return res.json();
+      })
+      .then(data => {
+        if (!data) return;
+
+        const s = data.salary;
+        const sum = data.summary;
+
+        document.getElementById("monthYear").innerText = `${data.month}/${data.year}`;
+        document.getElementById("workDays").innerText = sum.workDays + " ngày";
+        document.getElementById("lateDays").innerText = sum.lateDays + " ngày";
+        document.getElementById("totalHours").innerText = sum.totalWorkHours + " giờ";
+        document.getElementById("totalOT").innerText = sum.totalOvertime + " giờ";
+        document.getElementById("basicSalary").innerText = s.basicSalary.toLocaleString() + " VNĐ";
+        document.getElementById("otSalary").innerText = s.overtimeSalary.toLocaleString() + " VNĐ";
+        document.getElementById("lateDeduction").innerText = "-" + s.lateDeduction.toLocaleString() + " VNĐ";
+        document.getElementById("finalSalary").innerText = s.totalSalary.toLocaleString() + " VNĐ";
+
+        document.getElementById("salaryResult").style.display = "block";
+        document.getElementById("errorMsg").style.display = "none";
+      })
+      .catch(err => {
+        console.error("Lỗi khi gọi API lương:", err);
+        document.getElementById("salaryResult").style.display = "none";
+        const errorDiv = document.getElementById("errorMsg");
+        errorDiv.innerText = "Không thể kết nối đến máy chủ.";
+        errorDiv.style.display = "block";
+      });
+    }
+  </script>
+
+</body>
+</html>

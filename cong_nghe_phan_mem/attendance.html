@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chấm công nhân viên</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 30px; }
+    h2 { text-align: center; }
+    select, input, button {
+      padding: 6px 10px;
+      margin: 5px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #3b82f6;
+      color: white;
+    }
+    .form-section {
+      margin-bottom: 30px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2> Tra cứu & Gửi chấm công</h2>
+
+  <!-- 🔍 Tra cứu -->
+  <div class="form-section">
+    <h3>🔍 Tra cứu theo tháng</h3>
+    <label>Tháng:
+      <select id="month">
+        <option value="01">1</option>
+        <option value="02">2</option>
+        <option value="03">3</option>
+        <option value="04">4</option>
+        <option value="05">5</option>
+        <option value="06" selected>6</option>
+        <option value="07">7</option>
+        <option value="08">8</option>
+        <option value="09">9</option>
+        <option value="10">10</option>
+        <option value="11">11</option>
+        <option value="12">12</option>
+      </select>
+    </label>
+    <label>Năm:
+      <select id="year">
+        <option value="2024">2024</option>
+        <option value="2025" selected>2025</option>
+      </select>
+    </label>
+    <button id="searchBtn">🔍 Tra cứu</button>
+  </div>
+
+  <!--  Chấm công -->
+  <div class="form-section">
+    <h3> Gửi chấm công mới</h3>
+    <input type="date" id="date" />
+    <input type="time" id="checkIn" />
+    <input type="time" id="checkOut" />
+    <input type="text" id="status" placeholder="Trạng thái (VD: Đi làm)" />
+    <button id="submitBtn"> Gửi chấm công</button>
+  </div>
+
+  <!--  Kết quả -->
+  <table>
+    <thead>
+      <tr>
+        <th>Ngày</th>
+        <th>Giờ vào</th>
+        <th>Giờ ra</th>
+        <th>Trạng thái</th>
+      </tr>
+    </thead>
+    <tbody id="resultBody">
+      <tr><td colspan="4">Vui lòng tra cứu để xem kết quả.</td></tr>
+    </tbody>
+  </table>
+
+  <script>
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("Bạn chưa đăng nhập!");
+      window.location.href = "index.html";
+    }
+
+    document.getElementById("searchBtn").addEventListener("click", fetchAttendance);
+    document.getElementById("submitBtn").addEventListener("click", submitAttendance);
+
+    function fetchAttendance() {
+      const month = document.getElementById("month").value;
+      const year = document.getElementById("year").value;
+
+      fetch(`http://localhost:3001/api/attendance?month=${month}&year=${year}`, {
+        headers: {
+          Authorization: "Bearer " + token
+        }
+      })
+      .then(res => {
+        if (res.status === 404) {
+          document.getElementById("resultBody").innerHTML = `<tr><td colspan="4">Không có dữ liệu</td></tr>`;
+          return [];
+        }
+        if (!res.ok) throw new Error("Lỗi server");
+        return res.json();
+      })
+      .then(data => {
+        const tbody = document.getElementById("resultBody");
+        tbody.innerHTML = "";
+        data.forEach(record => {
+          tbody.innerHTML += `
+            <tr>
+              <td>${record.date}</td>
+              <td>${record.checkIn || "–"}</td>
+              <td>${record.checkOut || "–"}</td>
+              <td>${record.status}</td>
+            </tr>
+          `;
+        });
+      })
+      .catch(err => {
+        console.error(" Lỗi tra cứu:", err);
+        alert("Không thể tra cứu dữ liệu");
+      });
+    }
+
+    function submitAttendance() {
+      const date = document.getElementById("date").value;
+      const checkIn = document.getElementById("checkIn").value;
+      const checkOut = document.getElementById("checkOut").value;
+      const status = document.getElementById("status").value;
+
+      if (!date || !checkIn || !checkOut || !status) {
+        alert("Vui lòng điền đầy đủ thông tin");
+        return;
+      }
+
+      fetch("http://localhost:3001/api/attendance", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token
+        },
+        body: JSON.stringify({
+          date,
+          checkIn,
+          checkOut,
+          status,
+          workHours: 8,
+          overtime: 0
+        })
+      })
+      .then(res => {
+        if (!res.ok) return res.text().then(text => { throw new Error(text); });
+        return res.json();
+      })
+      .then(data => {
+        alert(" Chấm công thành công!");
+        fetchAttendance();
+      })
+      .catch(err => {
+        console.error(" Lỗi chấm công:", err);
+        alert("Lỗi khi gửi chấm công: " + err.message);
+      });
+    }
+  </script>
+</body>
+</html>

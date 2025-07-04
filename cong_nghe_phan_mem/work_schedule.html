@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lịch làm việc & nghỉ phép</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .month-nav {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .month-nav button {
+      padding: 8px 12px;
+      margin: 0 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #3b82f6;
+      color: white;
+    }
+    tr.leave { background-color: #fff3cd; }
+    tr.weekend { background-color: #f8d7da; }
+    tr.absent { background-color: #f2f2f2; }
+    tr.worked { background-color: #d1e7dd; }
+  </style>
+</head>
+<body>
+  <h1>📅 Lịch làm việc & nghỉ phép</h1>
+
+  <div class="month-nav">
+    <button onclick="changeMonth(-1)">← Tháng trước</button>
+    <span id="monthYear"></span>
+    <button onclick="changeMonth(1)">Tháng sau →</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Ngày</th>
+        <th>Thứ</th>
+        <th>Trạng thái</th>
+        <th>Chi tiết</th>
+      </tr>
+    </thead>
+    <tbody id="scheduleBody">
+      <tr><td colspan="4">Đang tải dữ liệu...</td></tr>
+    </tbody>
+  </table>
+
+  <script>
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Vui lòng đăng nhập trước");
+      window.location.href = "index.html";
+    }
+
+    let currentMonth = new Date().getMonth() + 1;
+    let currentYear = new Date().getFullYear();
+
+    const monthYearLabel = document.getElementById("monthYear");
+
+    function changeMonth(delta) {
+      currentMonth += delta;
+      if (currentMonth > 12) {
+        currentMonth = 1;
+        currentYear++;
+      } else if (currentMonth < 1) {
+        currentMonth = 12;
+        currentYear--;
+      }
+      loadSchedule();
+    }
+
+    function formatDateVN(dateStr) {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString("vi-VN");
+    }
+
+    function loadSchedule() {
+      monthYearLabel.textContent = `Tháng ${currentMonth}/${currentYear}`;
+      const tbody = document.getElementById("scheduleBody");
+      tbody.innerHTML = `<tr><td colspan="4">Đang tải dữ liệu...</td></tr>`;
+
+      fetch(`http://localhost:3001/api/schedule?month=${currentMonth}&year=${currentYear}`, {
+        headers: {
+          Authorization: "Bearer " + token
+        }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Lỗi khi lấy dữ liệu");
+        return res.json();
+      })
+      .then(data => {
+        tbody.innerHTML = "";
+        if (data.calendar.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="4">Không có dữ liệu</td></tr>`;
+          return;
+        }
+
+        data.calendar.forEach(day => {
+          const tr = document.createElement("tr");
+          tr.className = day.dayType;
+
+          let detail = "-";
+          if (day.details.checkIn) {
+            detail = `Giờ vào: ${day.details.checkIn}, ra: ${day.details.checkOut || "–"}<br>
+                      Làm: ${day.details.workHours}h, Tăng ca: ${day.details.overtime || 0}h`;
+          } else if (day.details.reason) {
+            detail = day.details.reason;
+          }
+
+          tr.innerHTML = `
+            <td>${formatDateVN(day.date)}</td>
+            <td>${day.dayOfWeek}</td>
+            <td>${day.status}</td>
+            <td>${detail}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      })
+      .catch(err => {
+        console.error("Lỗi lịch làm việc:", err);
+        tbody.innerHTML = `<tr><td colspan="4">Không thể tải lịch làm việc</td></tr>`;
+      });
+    }
+
+    loadSchedule();
+  </script>
+  <p style="text-align:center; margin-top:20px;">
+  <button onclick="window.location.href='dashboard.html'">⬅ Quay về Dashboard</button>
+</p>
+</body>
+</html>

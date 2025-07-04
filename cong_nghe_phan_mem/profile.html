@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Thông tin cá nhân</title>
+  <style>
+    body { font-family: Arial; padding: 30px; }
+    h2 { text-align: center; }
+    table { margin: auto; border-collapse: collapse; }
+    td { padding: 8px 12px; }
+    input { padding: 5px; width: 250px; }
+    button { margin: 10px; padding: 6px 12px; }
+  </style>
+</head>
+<body>
+  <h2>👤 Thông tin cá nhân</h2>
+  <table id="profileTable"></table>
+
+  <div style="text-align:center;">
+    <button onclick="enableEdit()"> Sửa</button>
+    <button onclick="saveProfile()"> Lưu</button>
+  </div>
+
+  <script>
+    const token = localStorage.getItem("token");
+
+    let userData = {};
+
+    fetch("http://localhost:3001/api/profile", {
+      headers: { Authorization: "Bearer " + token }
+    })
+    .then(res => res.json())
+    .then(user => {
+      userData = user;
+      renderTable(user);
+    })
+    .catch(err => {
+      alert("Không thể tải thông tin cá nhân");
+      console.error(err);
+    });
+
+    function renderTable(user, editable = false) {
+      const table = document.getElementById("profileTable");
+      table.innerHTML = `
+        <tr><td>Họ tên:</td><td><input id="name" value="${user.name || ""}" ${!editable ? "disabled" : ""}></td></tr>
+        <tr><td>Giới tính:</td><td>
+          <select id="gender" ${!editable ? "disabled" : ""}>
+            <option value="Nam" ${user.gender === "Nam" ? "selected" : ""}>Nam</option>
+            <option value="Nữ" ${user.gender === "Nữ" ? "selected" : ""}>Nữ</option>
+          </select>
+        </td></tr>
+        <tr><td>Ngày sinh:</td><td><input type="date" id="dob" value="${user.dob || ""}" ${!editable ? "disabled" : ""}></td></tr>
+        <tr><td>Email:</td><td><input id="email" value="${user.email || ""}" ${!editable ? "disabled" : ""}></td></tr>
+        <tr><td>SĐT:</td><td><input id="phone" value="${user.phone || ""}" ${!editable ? "disabled" : ""}></td></tr>
+        <tr><td>Chức vụ:</td><td><input disabled value="${user.role}"></td></tr>
+        <tr><td>Tài khoản:</td><td><input disabled value="${user.username}"></td></tr>
+      `;
+    }
+
+    function enableEdit() {
+      renderTable(userData, true);
+    }
+
+    function saveProfile() {
+      const updated = {
+        name: document.getElementById("name").value,
+        gender: document.getElementById("gender").value,
+        dob: document.getElementById("dob").value,
+        email: document.getElementById("email").value,
+        phone: document.getElementById("phone").value,
+      };
+
+      fetch("http://localhost:3001/api/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+        body: JSON.stringify(updated)
+      })
+      .then(res => res.json())
+      .then(result => {
+        alert(result.message || " Cập nhật thành công!");
+        userData = { ...userData, ...updated };
+        renderTable(userData); // reload lại
+      })
+      .catch(err => {
+        alert(" Lỗi khi cập nhật");
+        console.error(err);
+      });
+    }
+  </script>
+</body>
+</html>
